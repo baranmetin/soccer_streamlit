@@ -4,7 +4,7 @@ import json
 from mplsoccer import VerticalPitch
 
 st.title("Euros 2024 Shot Map")
-st.subheader("In order to ")
+st.subheader("In order to filter players choose player")
 
 df = pd.read_csv('euros_2024_shot_map.csv')
 #print(df.head())
