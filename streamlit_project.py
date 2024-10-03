@@ -4,7 +4,7 @@ import json
 from mplsoccer import VerticalPitch
 
 st.title("Euros 2024 Shot Map")
-st.subheader("Filter to any team/player to see their shots taken!")
+st.subheader("In order to ")
 
 df = pd.read_csv('euros_2024_shot_map.csv')
 #print(df.head())
@@ -12,14 +12,17 @@ df = pd.read_csv('euros_2024_shot_map.csv')
 df = df[df['type'] == 'Shot'].reset_index(drop=True)
 df['location'] = df['location'].apply(json.loads)
 
-team = st.selectbox('Select a team', df['team'].sort_values().unique(),index=None)
+team = st.selectbox('Select a team', df['team'].sort_values().unique(), index=None)
 player = st.selectbox('Select a player', df[df['team'] == team]['player'].sort_values().unique(), index=None)
+shot_outcome = st.selectbox("Shot outcome",  df[df['player'] == player]['shot_outcome'].unique(), index=None)
 
 def filter_data(df, team, player):
     if team:
         df = df[df['team'] == team]
     if player:
         df = df[df['player'] == player]
+    if shot_outcome:
+        df = df[df['shot_outcome'] == shot_outcome]
         
     return df
 
@@ -42,5 +45,6 @@ def plot_shots(df, ax, pitch):
         )
 
 plot_shots(filtered_df, ax, pitch)
+
 
 st.pyplot(fig)
