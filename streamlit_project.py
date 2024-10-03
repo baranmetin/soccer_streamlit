@@ -4,47 +4,51 @@ import json
 from mplsoccer import VerticalPitch
 
 st.title("Euros 2024 Shot Map")
-st.subheader("In order to filter players choose player")
+st.subheader("Select team, player, and shot outcome to visualize the shot map, or view all shots.")
 
+# Load the data
 df = pd.read_csv('euros_2024_shot_map.csv')
-#print(df.head())
-
 df = df[df['type'] == 'Shot'].reset_index(drop=True)
 df['location'] = df['location'].apply(json.loads)
 
-team = st.selectbox('Select a team', df['team'].sort_values().unique(), index=None)
-player = st.selectbox('Select a player', df[df['team'] == team]['player'].sort_values().unique(), index=None)
-shot_outcome = st.selectbox("Select a shot outcome",  df[df['player'] == player]['shot_outcome'].unique(), index=None)
+# Sidebar for filtering
+team = st.sidebar.selectbox('Select a team', ['All'] + list(df['team'].sort_values().unique()))
+player = st.sidebar.selectbox('Select a player', ['All'] + list(df[df['team'] == team]['player'].sort_values().unique()) if team != 'All' else ['All'])
+shot_outcome = st.sidebar.selectbox("Shot outcome", ['All'] + list(df[df['player'] == player]['shot_outcome'].unique()) if player != 'All' else ['All'])
 
+# Function to filter data based on team, player, and shot outcome
 def filter_data(df, team, player, shot_outcome):
-    if team:
+    if team != 'All':
         df = df[df['team'] == team]
-    if player:
+    if player != 'All':
         df = df[df['player'] == player]
-    if shot_outcome:
+    if shot_outcome != 'All':
         df = df[df['shot_outcome'] == shot_outcome]
-        
     return df
 
+# Filtered dataframe
 filtered_df = filter_data(df, team, player, shot_outcome)
 
+# Create a vertical pitch
 pitch = VerticalPitch(pitch_type='statsbomb', half=True)
-fig, ax =pitch.draw(figsize=(10,10))
+fig, ax = pitch.draw(figsize=(10, 10))
 
+# Function to plot shots
 def plot_shots(df, ax, pitch):
     for x in df.to_dict(orient='records'):
         pitch.scatter(
-            x = float(x['location'][0]),
-            y = float(x['location'][1]),
+            x=float(x['location'][0]),
+            y=float(x['location'][1]),
             ax=ax,
-            s=1000 * x['shot_statsbomb_xg'], 
-            color = 'green' if x['shot_outcome'] == 'Goal' else 'white',
-            edgecolors = 'black',
-            alpha = 1 if x['type'] == 'goal' else 0.5,
-            zorder = 2 if x['type'] =='goal' else 1
+            s=1000 * x['shot_statsbomb_xg'],
+            color='green' if x['shot_outcome'] == 'Goal' else 'white',
+            edgecolors='black',
+            alpha=1 if x['shot_outcome'] == 'Goal' else 0.5,
+            zorder=2 if x['shot_outcome'] == 'Goal' else 1
         )
 
+# Plot filtered shots
 plot_shots(filtered_df, ax, pitch)
 
-
+# Display the plot
 st.pyplot(fig)
