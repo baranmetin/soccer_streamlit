@@ -14,9 +14,9 @@ df['location'] = df['location'].apply(json.loads)
 
 team = st.selectbox('Select a team', df['team'].sort_values().unique(), index=None)
 player = st.selectbox('Select a player', df[df['team'] == team]['player'].sort_values().unique(), index=None)
-shot_outcome = st.selectbox("Shot outcome",  df[df['player'] == player]['shot_outcome'].unique(), index=None)
+shot_outcome = st.selectbox("Select a shot outcome",  df[df['player'] == player]['shot_outcome'].unique(), index=None)
 
-def filter_data(df, team, player):
+def filter_data(df, team, player, shot_outcome):
     if team:
         df = df[df['team'] == team]
     if player:
