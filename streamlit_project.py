@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import json
-from mplsoccer import VerticalPitch
+import plotly.graph_objects as go
 
 st.title("Euros 2024 Shot Map")
 st.subheader("Select team, player, and shot outcome to visualize the shot map, or view all shots.")
@@ -29,26 +29,49 @@ def filter_data(df, team, player, shot_outcome):
 # Filtered dataframe
 filtered_df = filter_data(df, team, player, shot_outcome)
 
-# Create a vertical pitch
-pitch = VerticalPitch(pitch_type='statsbomb', half=True)
-fig, ax = pitch.draw(figsize=(10, 10))
+# Create the pitch layout for Plotly (resembling the vertical pitch)
+def create_pitch():
+    pitch_width = 120
+    pitch_height = 80
+    fig = go.Figure()
 
-# Function to plot shots
-def plot_shots(df, ax, pitch):
-    for x in df.to_dict(orient='records'):
-        pitch.scatter(
-            x=float(x['location'][0]),
-            y=float(x['location'][1]),
-            ax=ax,
-            s=1000 * x['shot_statsbomb_xg'],
-            color='green' if x['shot_outcome'] == 'Goal' else 'white',
-            edgecolors='black',
-            alpha=1 if x['shot_outcome'] == 'Goal' else 0.5,
-            zorder=2 if x['shot_outcome'] == 'Goal' else 1
-        )
+    # Add the field background
+    fig.update_layout(
+        plot_bgcolor='#a8bc95',
+        shapes=[
+            # Pitch outline
+            dict(type="rect", x0=0, y0=0, x1=pitch_width, y1=pitch_height, line=dict(color="black", width=3)),
+            # Center circle
+            dict(type="circle", x0=pitch_width/2 - 9.15, y0=pitch_height/2 - 9.15, x1=pitch_width/2 + 9.15, y1=pitch_height/2 + 9.15, line=dict(color="black", width=2)),
+            # Penalty area
+            dict(type="rect", x0=0, y0=18, x1=18, y1=62, line=dict(color="black", width=2)),
+            dict(type="rect", x0=pitch_width - 18, y0=18, x1=pitch_width, y1=62, line=dict(color="black", width=2)),
+        ],
+        xaxis=dict(range=[0, pitch_width], showgrid=False, zeroline=False, showticklabels=False),
+        yaxis=dict(range=[0, pitch_height], showgrid=False, zeroline=False, showticklabels=False),
+        width=700, height=500
+    )
+    return fig
 
-# Plot filtered shots
-plot_shots(filtered_df, ax, pitch)
+# Create the pitch figure
+fig = create_pitch()
+
+# Add shots to the pitch with player name and minute as hover info
+for _, row in filtered_df.iterrows():
+    fig.add_trace(go.Scatter(
+        x=[float(row['location'][0])],
+        y=[float(row['location'][1])],
+        mode='markers',
+        marker=dict(
+            size=1000 * row['shot_statsbomb_xg'],
+            color='green' if row['shot_outcome'] == 'Goal' else 'white',
+            line=dict(color='black', width=2),
+            opacity=1 if row['shot_outcome'] == 'Goal' else 0.5
+        ),
+        hoverinfo='text',
+        text=f"Player: {row['player']}<br>Minute: {row['minute']}",
+        name=row['player']
+    ))
 
 # Display the plot
-st.pyplot(fig)
+st.plotly_chart(fig)
