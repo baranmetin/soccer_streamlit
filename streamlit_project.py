@@ -6,7 +6,7 @@ from matplotlib.patches import Patch
 
 
 st.title("Euros 2024 Shot Map")
-st.subheader("Select teams, players, and shot outcomes to visualize the shot map for comparison.")
+st.subheader("Select teams, players, and shot outcomes to visualize the shot map for comparison. \n To compare select 2 players")
 
 # Load the data
 df = pd.read_csv('euros_2024_shot_map.csv')
@@ -14,13 +14,13 @@ df = df[df['type'] == 'Shot'].reset_index(drop=True)
 df['location'] = df['location'].apply(json.loads)
 
 # Sidebar for first player selection
-st.sidebar.header("First Player - 'Shown by blue'")
+st.sidebar.header("First Player - (Shown by blue)")
 team1 = st.sidebar.selectbox('Select first team', ['All'] + list(df['team'].sort_values().unique()), key="team1")
 player1 = st.sidebar.selectbox('Select first player', ['All'] + list(df[df['team'] == team1]['player'].sort_values().unique()) if team1 != 'All' else ['All'], key="player1")
 shot_outcome1 = st.sidebar.selectbox("First player's shot outcome", ['All'] + list(df[df['player'] == player1]['shot_outcome'].unique()) if player1 != 'All' else ['All'], key="outcome1")
 
 # Sidebar for second player selection
-st.sidebar.header("Second Player - 'Shown by red'")
+st.sidebar.header("Second Player - (Shown by red)")
 team2 = st.sidebar.selectbox('Select second team', ['All'] + list(df['team'].sort_values().unique()), key="team2")
 player2 = st.sidebar.selectbox('Select second player', ['All'] + list(df[df['team'] == team2]['player'].sort_values().unique()) if team2 != 'All' else ['All'], key="player2")
 shot_outcome2 = st.sidebar.selectbox("Second player's shot outcome", ['All'] + list(df[df['player'] == player2]['shot_outcome'].unique()) if player2 != 'All' else ['All'], key="outcome2")
