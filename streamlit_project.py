@@ -6,7 +6,7 @@ from matplotlib.patches import Patch
 
 
 st.title("Euros 2024 Shot Map")
-st.subheader("Select teams, players, and shot outcomes to visualize the shot map for comparison. \n To compare select 2 players select both players using the menu")
+st.subheader("Select teams, players, and shot outcomes to visualize the shot map for comparison. \n For comparison, select 2 players select both players using the menu")
 
 # Load the data
 df = pd.read_csv('euros_2024_shot_map.csv')
